@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS V2 — Prospección Inteligente Menlun</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --navy: #1a3a52;
+      --sky: #00bfff;
+      --beige: #f5f1ed;
+      --gray-light: #e8e5e0;
+      --gray-med: #c9c5bd;
+      --text-dark: #2c2c2c;
+      --text-dim: #7a7a7a;
+      --success: #4caf50;
+      --warning: #ff9800;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, var(--beige) 0%, var(--gray-light) 100%);
+      color: var(--text-dark);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: white;
+      border-bottom: 2px solid var(--navy);
+      padding: 20px 30px;
+      box-shadow: 0 2px 8px rgba(26, 58, 82, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 50px;
+      height: 50px;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><defs><style>.pmps-navy{fill:%231a3a52}.pmps-sky{fill:%2300bfff}</style></defs><g class="pmps-navy"><path d="M200 50 L280 50 L280 130 L200 130 Z"/><path d="M100 150 L380 150 L380 450 L100 450 Z"/></g><g class="pmps-sky"><circle cx="240" cy="100" r="40"/></g></svg>') no-repeat center;
+      background-size: contain;
+    }
+
+    .header h1 {
+      color: var(--navy);
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .stats-box {
+      background: var(--beige);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .stats-box strong {
+      color: var(--navy);
+      font-size: 16px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+
+    .toolbar {
+      background: white;
+      border: 1px solid var(--gray-light);
+      border-radius: 8px;
+      padding: 15px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--gray-light);
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--sky);
+      box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.1);
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--navy);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #0f2537;
+      box-shadow: 0 4px 12px rgba(26, 58, 82, 0.2);
+    }
+
+    .btn-secondary {
+      background: var(--sky);
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .btn-secondary:hover {
+      background: #0099cc;
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .table-wrapper {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--navy);
+      color: white;
+    }
+
+    th {
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gray-light);
+      font-size: 13px;
+    }
+
+    tbody tr:hover {
+      background: var(--beige);
+      cursor: pointer;
+    }
+
+    .td-empresa { font-weight: 600; color: var(--navy); }
+    .td-email { color: var(--sky); }
+
+    .email-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+
+    .email-dot.valid { background: var(--success); }
+    .email-dot.catch-all { background: var(--warning); }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 700px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--gray-light);
+      padding-bottom: 15px;
+    }
+
+    .modal-header h2 {
+      color: var(--navy);
+      font-size: 20px;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-dim);
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: var(--text-dark);
+      font-size: 13px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--gray-light);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--sky);
+      box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.1);
+    }
+
+    .ai-generator {
+      background: linear-gradient(135deg, rgba(0, 191, 255, 0.05) 0%, rgba(26, 58, 82, 0.05) 100%);
+      border: 1px solid var(--sky);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 15px 0;
+    }
+
+    .ai-generator h3 {
+      color: var(--navy);
+      font-size: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ai-generator .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .ai-option {
+      background: white;
+      border: 1px solid var(--sky);
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 12px;
+      max-height: 80px;
+      overflow-y: auto;
+    }
+
+    .ai-option:hover {
+      background: var(--beige);
+      border-color: var(--navy);
+    }
+
+    .ai-option.selected {
+      background: var(--sky);
+      color: white;
+      border-color: var(--navy);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: flex-end;
+      border-top: 1px solid var(--gray-light);
+      padding-top: 15px;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--gray-light);
+      border-top-color: var(--sky);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .pipeline-card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      border-left: 4px solid var(--sky);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+
+    .pipeline-card h3 {
+      color: var(--navy);
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .pipeline-card .count {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--sky);
+    }
+
+    .success-msg {
+      background: #d4edda;
+      color: #155724;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      border-left: 4px solid var(--success);
+    }
+
+    .error-msg {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      border-left: 4px solid #dc3545;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-section">
+    <div class="logo"></div>
+    <div>
+      <h1>NEXUS V2</h1>
+      <p style="font-size: 12px; color: var(--text-dim); margin: 2px 0;">Prospección Inteligente para Menlun</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="stats-box">
+      <strong id="totalContacts">0</strong><br>Contactos
+    </div>
+    <div class="stats-box">
+      <strong id="nuevos">0</strong><br>Nuevos
+    </div>
+    <div class="stats-box">
+      <strong id="contactados">0</strong><br>Contactados
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="pipeline" id="pipeline"></div>
+
+  <div class="toolbar">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="🔍 Buscar empresa, contacto, email...">
+    </div>
+    <button class="btn btn-primary" onclick="openAddModal()">+ Agregar Contacto</button>
+    <button class="btn btn-secondary btn-small" onclick="exportCSV()">📥 Descargar CSV</button>
+  </div>
+
+  <div class="table-wrapper">
+    <table id="contactsTable">
+      <thead>
+        <tr>
+          <th onclick="sortBy('empresa')">EMPRESA ↕</th>
+          <th>UBICACIÓN</th>
+          <th>NOMBRE</th>
+          <th>CARGO</th>
+          <th>EMAIL</th>
+          <th>TELÉFONO</th>
+          <th>MAPS</th>
+          <th onclick="sortBy('estatus')">ESTATUS ↕</th>
+          <th onclick="sortBy('prioridad')">PRIORIDAD ↕</th>
+          <th>PRÓXIMA ACCIÓN</th>
+          <th>ACCIONES</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL EDICIÓN/CREACIÓN -->
+<div class="modal" id="editModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">Agregar Contacto</h2>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div id="successMessage"></div>
+    <form onsubmit="saveContact(event)">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="form-group">
+          <label>Empresa *</label>
+          <input type="text" id="empresa" required>
+        </div>
+        <div class="form-group">
+          <label>Ubicación</label>
+          <input type="text" id="ubicacion" placeholder="Ciudad, región">
+        </div>
+        <div class="form-group">
+          <label>Nombre Contacto</label>
+          <input type="text" id="nombre">
+        </div>
+        <div class="form-group">
+          <label>Cargo</label>
+          <input type="text" id="cargo">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="email">
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="tel" id="telefono">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Notas</label>
+        <textarea id="notas"></textarea>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="form-group">
+          <label>Estatus</label>
+          <select id="estatus">
+            <option value="Nuevo">Nuevo</option>
+            <option value="Contactado">Contactado</option>
+            <option value="En seguimiento">En seguimiento</option>
+            <option value="Propuesta enviada">Propuesta enviada</option>
+            <option value="Ganado">Ganado</option>
+            <option value="Perdido">Perdido</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Prioridad</label>
+          <select id="prioridad">
+            <option value="Alta">Alta</option>
+            <option value="Media">Media</option>
+            <option value="Baja">Baja</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Próxima Acción</label>
+        <input type="datetime-local" id="proximaAccion">
+      </div>
+
+      <!-- GENERADOR DE MENSAJES CON IA -->
+      <div class="ai-generator">
+        <h3>🤖 Generar Mensaje de Seguimiento</h3>
+        <button type="button" class="btn btn-secondary btn-small" onclick="generateMessage()" style="margin-bottom: 10px;">
+          Generar opciones
+        </button>
+        <div class="options" id="aiOptions"></div>
+        <div class="form-group" style="margin-top: 10px;">
+          <label>Mensaje seleccionado/personalizado:</label>
+          <textarea id="mensajeGenerado" placeholder="Aquí aparecerá el mensaje..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn" onclick="closeModal()" style="background: var(--gray-med); color: var(--text-dark);">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="deleteBtn" onclick="deleteContact()" style="display: none; background: #dc3545;">Eliminar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL CALENDARIO -->
+<div class="modal" id="calendarModal">
+  <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-header">
+      <h2>Agendar en Google Calendar</h2>
+      <button class="close-btn" onclick="closeCalendarModal()">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Fecha y hora:</label>
+      <input type="datetime-local" id="calendarDateTime">
+    </div>
+    <div class="form-group">
+      <label>Descripción:</label>
+      <textarea id="calendarDesc" placeholder="Ej: Llamada con Gerente de Calidad"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeCalendarModal()" style="background: var(--gray-med); color: var(--text-dark);">Cancelar</button>
+      <button class="btn btn-secondary" onclick="syncGoogleCalendar()">Sincronizar 📅</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let contacts = [];
+  let editingId = null;
+  let nextId = 1;
+
+  // DATOS INICIALES (14 CONTACTOS)
+  const initialContacts = [
+    { id: 1, empresa: 'SuKarne', ubicacion: 'Culiacán', nombre: 'Jose Roberto Salazar Renteria', cargo: 'Supervisor de Almacén', email: 'jose.renteria@sukarne.com', email_status: 'valid', telefono: '', estatus: 'Nuevo', prioridad: 'Alta', notas: '', proximaAccion: '', canal: 'Email' },
+    { id: 2, empresa: 'SuKarne', ubicacion: 'Culiacán', nombre: 'Director Operaciones', cargo: 'Director', email: '', email_status: '', telefono: '', estatus: 'Nuevo', prioridad: 'Alta', notas: '', proximaAccion: '', canal: '' },
+    { id: 3, empresa: 'Kekén', ubicacion: 'México', nombre: 'Ramon Gonzalez', cargo: 'Gerente de Aseguramiento de Calidad', email: 'r.gonzalez@keken.com.mx', email_status: 'catch-all', telefono: '', estatus: 'Nuevo', prioridad: 'Alta', notas: '', proximaAccion: '', canal: 'Email' },
+    { id: 4, empresa: 'Kekén', ubicacion: 'México', nombre: 'Dave Meel', cargo: 'Manager Operations', email: 'dave.meel@keken.com.mx', email_status: 'catch-all', telefono: '', estatus: 'Nuevo', prioridad: 'Alta', notas: '', proximaAccion: '', canal: 'Email' },
+    { id: 5, empresa: 'Nestlé Coatepec', ubicacion: 'Coatepec, Veracruz', nombre: 'Gerente de Calidad', cargo: 'Gerente', email: '', email_status: '', telefono: '', estatus: 'Nuevo', prioridad: 'Media', notas: '', proximaAccion: '', canal: '' },
+    { id: 6, empresa: 'Nestlé Toluca', ubicacion: 'Toluca', nombre: 'Director de Inocuidad', cargo: 'Director', email: '', email_status: '', telefono: '', estatus: 'Nuevo', prioridad: 'Media', notas: '', proximaAccion: '', canal: '' },
+    { id: 7, empresa: 'Nestlé México', ubicacion: 'CDMX', nombre: 'Jefe de Saneamiento', cargo: 'Jefe', email: '', email_status: '', telefono: '', estatus: 'Nuevo', prioridad: 'Media', notas: '', proximaAccion: '', canal: '' },
+    { id: 8, empresa: 'Bachoco', ubicacion: 'Múltiples', nombre: 'Gerente de Calidad', cargo: 'Gerente', email: '', email_status: '', telefono: '', estatus: 'Nuevo', prioridad: 'Alta', notas: '', proximaAccion: '', canal: '' },
+    { id: 9, empresa: 'IFF México', ubicacion: 'CDMX', nombre: 'Director Técnico', cargo: 'Director', email: '', email_status: '', telefono: '', estatus: 'Nuevo', prioridad: 'Media', notas: '', proximaAccion: '', canal: '' },
+    { id: 10, empresa: 'Yakult México', ubicacion: 'CDMX', nombre: 'Supervisor Calidad', cargo: 'Supervisor', email: '', email_status: '', telefono: '', estatus: 'Nuevo', prioridad: 'Baja', notas: '', proximaAccion: '', canal: '' },
+    { id: 11, empresa: 'Unilever México', ubicacion: 'CDMX', nombre: 'Jefe de Procesos', cargo: 'Jefe', email: '', email_status: '', telefono: '', estatus: 'Nuevo', prioridad: 'Media', notas: '', proximaAccion: '', canal: '' },
+    { id: 12, empresa: 'Grupo Cuadritos', ubicacion: 'CDMX', nombre: 'Gerente de Operaciones', cargo: 'Gerente', email: '', email_status: '', telefono: '', estatus: 'Nuevo', prioridad: 'Baja', notas: '', proximaAccion: '', canal: '' },
+    { id: 13, empresa: 'Ovomex', ubicacion: 'México', nombre: 'Director de Calidad', cargo: 'Director', email: '', email_status: '', telefono: '', estatus: 'Nuevo', prioridad: 'Media', notas: '', proximaAccion: '', canal: '' },
+    { id: 14, empresa: 'Grupo La Florida', ubicacion: 'Veracruz', nombre: 'Jefe de Saneamiento', cargo: 'Jefe', email: '', email_status: '', telefono: '', estatus: 'Nuevo', prioridad: 'Baja', notas: '', proximaAccion: '', canal: '' }
+  ];
+
+  function load() {
+    const saved = localStorage.getItem('nexusContacts');
+    contacts = saved ? JSON.parse(saved) : initialContacts;
+    nextId = Math.max(...contacts.map(c => c.id), 0) + 1;
+    renderTable();
+    updateStats();
+  }
+
+  function save() {
+    localStorage.setItem('nexusContacts', JSON.stringify(contacts));
+  }
+
+  function openAddModal() {
+    editingId = null;
+    document.getElementById('modalTitle').textContent = 'Agregar Contacto';
+    document.getElementById('deleteBtn').style.display = 'none';
+    document.getElementById('empresa').value = '';
+    document.getElementById('ubicacion').value = '';
+    document.getElementById('nombre').value = '';
+    document.getElementById('cargo').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('telefono').value = '';
+    document.getElementById('notas').value = '';
+    document.getElementById('estatus').value = 'Nuevo';
+    document.getElementById('prioridad').value = 'Alta';
+    document.getElementById('proximaAccion').value = '';
+    document.getElementById('mensajeGenerado').value = '';
+    document.getElementById('aiOptions').innerHTML = '';
+    document.getElementById('successMessage').innerHTML = '';
+    document.getElementById('editModal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('editModal').classList.remove('active');
+    editingId = null;
+  }
+
+  function closeCalendarModal() {
+    document.getElementById('calendarModal').classList.remove('active');
+  }
+
+  function editContact(id) {
+    editingId = id;
+    const c = contacts.find(x => x.id === id);
+    document.getElementById('modalTitle').textContent = `Editar: ${c.empresa}`;
+    document.getElementById('deleteBtn').style.display = 'block';
+    document.getElementById('empresa').value = c.empresa;
+    document.getElementById('ubicacion').value = c.ubicacion;
+    document.getElementById('nombre').value = c.nombre;
+    document.getElementById('cargo').value = c.cargo;
+    document.getElementById('email').value = c.email;
+    document.getElementById('telefono').value = c.telefono;
+    document.getElementById('notas').value = c.notas;
+    document.getElementById('estatus').value = c.estatus;
+    document.getElementById('prioridad').value = c.prioridad;
+    document.getElementById('proximaAccion').value = c.proximaAccion;
+    document.getElementById('mensajeGenerado').value = '';
+    document.getElementById('aiOptions').innerHTML = '';
+    document.getElementById('successMessage').innerHTML = '';
+    document.getElementById('editModal').classList.add('active');
+  }
+
+  function saveContact(e) {
+    e.preventDefault();
+    const data = {
+      id: editingId || nextId++,
+      empresa: document.getElementById('empresa').value,
+      ubicacion: document.getElementById('ubicacion').value,
+      nombre: document.getElementById('nombre').value,
+      cargo: document.getElementById('cargo').value,
+      email: document.getElementById('email').value,
+      email_status: document.getElementById('email').value ? 'valid' : '',
+      telefono: document.getElementById('telefono').value,
+      notas: document.getElementById('notas').value,
+      estatus: document.getElementById('estatus').value,
+      prioridad: document.getElementById('prioridad').value,
+      proximaAccion: document.getElementById('proximaAccion').value,
+      canal: 'Manual'
+    };
+
+    if (editingId) {
+      const idx = contacts.findIndex(x => x.id === editingId);
+      contacts[idx] = { ...contacts[idx], ...data };
+    } else {
+      contacts.push(data);
+    }
+
+    save();
+    renderTable();
+    updateStats();
+    document.getElementById('successMessage').innerHTML = '<div class="success-msg">✓ Contacto guardado correctamente</div>';
+    setTimeout(() => closeModal(), 1500);
+  }
+
+  function deleteContact() {
+    if (!confirm('¿Eliminar este contacto? No se puede deshacer.')) return;
+    contacts = contacts.filter(c => c.id !== editingId);
+    save();
+    renderTable();
+    updateStats();
+    closeModal();
+  }
+
+  // GENERADOR DE MENSAJES CON IA (Claude API)
+  async function generateMessage() {
+    const empresa = document.getElementById('empresa').value;
+    const nombre = document.getElementById('nombre').value;
+    const cargo = document.getElementById('cargo').value;
+    const notas = document.getElementById('notas').value;
+
+    if (!empresa) {
+      alert('Ingresa el nombre de la empresa primero');
+      return;
+    }
+
+    const optionsDiv = document.getElementById('aiOptions');
+    optionsDiv.innerHTML = '<div class="loading"></div> Generando mensajes...';
+
+    const prompt = `Genera 3 opciones de mensajes cortos (máximo 100 palabras cada uno) de seguimiento comercial profesional para contactar a:
+    
+Empresa: ${empresa}
+Contacto: ${nombre || '(No especificado)'}
+Cargo: ${cargo || '(No especificado)'}
+Contexto adicional: ${notas || '(Ninguno)'}
+
+Menlun es fabricante de productos químicos para limpieza y desinfección industrial con certificaciones ISO 22000, NSF, COFEPRIS. Ofrece CIP, desinfectantes, validaciones FSSC 22000, auditorías.
+
+Genera 3 opciones diferentes:
+1. Consultiva (preguntar sobre necesidades actuales)
+2. Referencia-basada (mencionar cliente similar)
+3. Valor directo (beneficio específico)
+
+Formato: Devuelve SOLO los 3 mensajes, uno por línea, sin numeración ni formato especial.`;
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': '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', // ✅ API KEY CONFIGURADA
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: 'claude-opus-4-20250805',
+          max_tokens: 800,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const messages = data.content[0].text.split('\n').filter(m => m.trim()).slice(0, 3);
+
+      optionsDiv.innerHTML = messages.map((msg, i) => 
+        `<div class="ai-option" onclick="selectMessage('${msg.replace(/'/g, "\\'")}')">${msg}</div>`
+      ).join('');
+    } catch (err) {
+      optionsDiv.innerHTML = `<div class="error-msg">Error generando mensajes. Verifica tu API key de Claude.</div>`;
+    }
+  }
+
+  function selectMessage(msg) {
+    document.getElementById('mensajeGenerado').value = msg;
+    document.querySelectorAll('.ai-option').forEach(el => el.classList.remove('selected'));
+    event.target.classList.add('selected');
+  }
+
+  // GOOGLE CALENDAR INTEGRATION (Requiere OAuth)
+  function openCalendarModal(id) {
+    editingId = id;
+    document.getElementById('calendarModal').classList.add('active');
+  }
+
+  async function syncGoogleCalendar() {
+    const dt = document.getElementById('calendarDateTime').value;
+    const desc = document.getElementById('calendarDesc').value;
+
+    if (!dt) {
+      alert('Selecciona fecha y hora');
+      return;
+    }
+
+    // ⚠️ NOTA: Para que funcione, necesitas OAuth setup en Google Cloud
+    // Este es un placeholder que muestra cómo se vería
+    alert('🔗 Sincronización con Google Calendar:\n\nEsta función requiere autenticación OAuth.\nPor ahora, abre Google Calendar manualmente y crea el evento:\n\n' + dt);
+    closeCalendarModal();
+  }
+
+  function renderTable() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = contacts.filter(c =>
+      c.empresa.toLowerCase().includes(searchTerm) ||
+      c.nombre.toLowerCase().includes(searchTerm) ||
+      c.email.toLowerCase().includes(searchTerm) ||
+      c.cargo.toLowerCase().includes(searchTerm)
+    );
+
+    const html = filtered.map(c => `
+      <tr>
+        <td class="td-empresa">${c.empresa}</td>
+        <td>${c.ubicacion}</td>
+        <td>${c.nombre}</td>
+        <td>${c.cargo}</td>
+        <td class="td-email">
+          ${c.email ? `<span class="email-dot ${c.email_status || 'valid'}"></span><a href="mailto:${c.email}">${c.email}</a>` : '—'}
+        </td>
+        <td>${c.telefono || '—'}</td>
+        <td>
+          ${c.ubicacion ? `<a class="maps-link" href="https://www.google.com/maps/search/${encodeURIComponent(c.empresa + ' ' + c.ubicacion)}" target="_blank">📍 Mapa</a>` : '—'}
+        </td>
+        <td>${c.estatus}</td>
+        <td>${c.prioridad}</td>
+        <td>${c.proximaAccion ? new Date(c.proximaAccion).toLocaleDateString('es-MX') : '—'}</td>
+        <td style="text-align: center;">
+          <button class="btn btn-small btn-primary" onclick="editContact(${c.id})" style="width: 70px;">Editar</button>
+        </td>
+      </tr>
+    `).join('');
+
+    document.getElementById('tableBody').innerHTML = html;
+  }
+
+  function sortBy(field) {
+    contacts.sort((a, b) => {
+      const aVal = a[field];
+      const bVal = b[field];
+      return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+    });
+    save();
+    renderTable();
+  }
+
+  function updateStats() {
+    document.getElementById('totalContacts').textContent = contacts.length;
+    document.getElementById('nuevos').textContent = contacts.filter(c => c.estatus === 'Nuevo').length;
+    document.getElementById('contactados').textContent = contacts.filter(c => c.estatus !== 'Nuevo').length;
+    updatePipeline();
+  }
+
+  function updatePipeline() {
+    const pipeline = {
+      'Nuevo': contacts.filter(c => c.estatus === 'Nuevo').length,
+      'Contactado': contacts.filter(c => c.estatus === 'Contactado').length,
+      'En seguimiento': contacts.filter(c => c.estatus === 'En seguimiento').length,
+      'Propuesta': contacts.filter(c => c.estatus === 'Propuesta enviada').length,
+      'Ganado': contacts.filter(c => c.estatus === 'Ganado').length
+    };
+
+    document.getElementById('pipeline').innerHTML = Object.entries(pipeline).map(([stage, count]) => `
+      <div class="pipeline-card">
+        <h3>${stage}</h3>
+        <div class="count">${count}</div>
+      </div>
+    `).join('');
+  }
+
+  function exportCSV() {
+    const csv = [
+      ['Empresa', 'Ubicación', 'Nombre', 'Cargo', 'Email', 'Teléfono', 'Estatus', 'Prioridad', 'Próxima Acción', 'Notas'],
+      ...contacts.map(c => [c.empresa, c.ubicacion, c.nombre, c.cargo, c.email, c.telefono, c.estatus, c.prioridad, c.proximaAccion, c.notas])
+    ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nexus-v2-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+  }
+
+  document.getElementById('searchInput').addEventListener('input', renderTable);
+
+  // INIT
+  load();
+</script>
+
+</body>
+</html>
